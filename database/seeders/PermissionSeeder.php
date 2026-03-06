@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -36,10 +37,10 @@ class PermissionSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission]);
         }
         foreach ($roles as $role) {
-            Role::create(['name' => $role]);
+            Role::firstOrCreate(['name' => $role]);
         }
 
         $adminRole = Role::findByName('admin');
@@ -72,8 +73,22 @@ class PermissionSeeder extends Seeder
         $admin = User::create([
             'name' => 'Admin',
             'email' => 'admin@example.com',
-            'password' => bcrypt('admin')
+            'password' => Hash::make('admin')
         ]);
         $admin->assignRole($adminRole);
+
+        $pm = User::create([
+            'name' => 'Project Manager',
+            'email' => 'pm@example.com',
+            'password' => Hash::make('pm')
+        ]);
+        $pm->assignRole($pmRole);
+
+        $engineer = User::create([
+            'name' => 'Engineer',
+            'email' => 'engineer@example.com',
+            'password' => Hash::make('engineer')
+        ]);
+        $engineer->assignRole($engineerRole);
     }
 }
