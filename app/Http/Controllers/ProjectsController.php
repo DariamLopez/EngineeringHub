@@ -19,7 +19,7 @@ class ProjectsController extends Controller
     {
         $this->authorize('viewAny', Projects::class);
 
-        $query = Projects::query();
+        $query = Projects::with('createdBy');
         if ($projects_id = $request->query('projects_id')) {
             $query->where('projects_id', $projects_id);
         }

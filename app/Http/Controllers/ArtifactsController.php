@@ -13,7 +13,7 @@ class ArtifactsController extends Controller
      */
     public function index()
     {
-        //
+
     }
 
     /**

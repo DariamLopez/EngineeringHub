@@ -27,7 +27,6 @@ class StoreProjectsRequest extends FormRequest
             'client_name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'in:'. implode(',', ProjectStatusEnum::values()),
-            'created_by' => 'required|exists:users,id',
             'is_archived' => 'boolean',
         ];
     }

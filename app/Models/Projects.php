@@ -18,6 +18,10 @@ class Projects extends Model
         'is_archived'
     ];
 
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
     public function users()
     {
         return $this->belongsToMany(User::class, 'project_user', 'project_id', 'user_id')->withTimestamps();
