@@ -24,6 +24,7 @@ use Spatie\Permission\Models\Role;
 class AuthController extends Controller
 {
     /*
+     * TODO Añadir permisos para registrar usuario, solo admin puede registrar usuarios
      * $request: name, email, password, role
      */
     public function register(RegisterRequest $request)
@@ -93,7 +94,19 @@ class AuthController extends Controller
         if ($token) {
             $token->delete();
         }
-        return response()->noContent();
+        return response()->json(['message' => 'Logged out successfully.'], 200);
+    }
+
+    //TODO Añadir permisos para eliminar usuario, solo admin puede eliminar usuarios
+    public function deleteUser(Request $request)
+    {
+        $user = $request->user();
+        $user->tokens()->delete(); // Revocar todos los tokens
+        $user->delete(); // Eliminar usuario
+        return response()->json([
+            'message' => 'User deleted successfully.',
+            'user' => $user
+            ], 200);
     }
 
     public function me(Request $request)

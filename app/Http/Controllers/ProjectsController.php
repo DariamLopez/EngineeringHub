@@ -5,15 +5,47 @@ namespace App\Http\Controllers;
 use App\Models\Projects;
 use App\Http\Requests\StoreProjectsRequest;
 use App\Http\Requests\UpdateProjectsRequest;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
 
 class ProjectsController extends Controller
 {
+    use AuthorizesRequests;
     /**
+     * TODO agregar permisos y request
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $this->authorize('viewAny', Projects::class);
+
+        $query = Projects::query();
+        if ($projects_id = $request->query('projects_id')) {
+            $query->where('projects_id', $projects_id);
+        }
+        if ($projects_client_name = $request->query('client_name')) {
+            $query->where('client_name', 'like', '%' . $projects_client_name . '%');
+        }
+        if ($projects_status = $request->query('status')) {
+            $query->where('status', $projects_status);
+        }
+        if ($request->query('is_archived')) {
+            $query->where('is_archived', $request->query('is_archived'));
+        }
+        if ($projects_created_by_id = $request->query('created_by_id')){
+            $query->where('created_by', $projects_created_by_id);
+        }
+
+        $order_by = $request->query('order_by', 'id');
+        $order_dir = $request->query('order_dir', 'desc');
+
+        if ($per_page = $request->query('per_page')) {
+            $projects = $query->orderBy($order_by, $order_dir)->paginate($per_page);
+        } else {
+            $projects = $query->orderBy($order_by, $order_dir)->get();
+        }
+        //$payment = Payment::all();
+        return response()->json($projects);
     }
 
     /**
@@ -29,7 +61,16 @@ class ProjectsController extends Controller
      */
     public function store(StoreProjectsRequest $request)
     {
-        //
+        $this->authorize('create', Projects::class);
+
+        $data = $request->validated();
+
+        // Set created_by to the authenticated user's id
+        $data['created_by'] = $request->user()->id;
+
+        $projects = Projects::create($data);
+
+        return response()->json($projects, 201);
     }
 
     /**
@@ -37,7 +78,9 @@ class ProjectsController extends Controller
      */
     public function show(Projects $projects)
     {
-        //
+        $this->authorize('view', $projects);
+
+        return response()->json($projects);
     }
 
     /**
@@ -53,7 +96,13 @@ class ProjectsController extends Controller
      */
     public function update(UpdateProjectsRequest $request, Projects $projects)
     {
-        //
+        $this->authorize('update', $projects);
+
+        $projects->update($request->validated());
+        return response()->json([
+            'message' => 'Project update successfully',
+            'project' => $projects
+        ]);
     }
 
     /**
@@ -61,6 +110,10 @@ class ProjectsController extends Controller
      */
     public function destroy(Projects $projects)
     {
-        //
+        $this->authorize('delete', $projects);
+        $projects->delete();
+        return response()->json([
+            'message' => 'Project deleted successfully'
+        ]);
     }
 }

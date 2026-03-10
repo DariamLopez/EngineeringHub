@@ -13,6 +13,9 @@ class ProjectsPolicy
      */
     public function viewAny(User $user): bool
     {
+        if ($user->can('view_projects')) {
+            return true;
+        }
         return false;
     }
 
@@ -21,6 +24,7 @@ class ProjectsPolicy
      */
     public function view(User $user, Projects $projects): bool
     {
+        //TODO
         return false;
     }
 
@@ -29,6 +33,9 @@ class ProjectsPolicy
      */
     public function create(User $user): bool
     {
+        if ($user->can('edit_projects')) {
+            return true;
+        }
         return false;
     }
 
@@ -37,6 +44,9 @@ class ProjectsPolicy
      */
     public function update(User $user, Projects $projects): bool
     {
+        if ($user->can('edit_projects')) {
+            return true;
+        }
         return false;
     }
 
@@ -45,6 +55,9 @@ class ProjectsPolicy
      */
     public function delete(User $user, Projects $projects): bool
     {
+        if ($user->can('edit_projects')) {
+            return true;
+        }
         return false;
     }
 

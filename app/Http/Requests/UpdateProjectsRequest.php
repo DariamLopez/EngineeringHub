@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\ProjectStatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateProjectsRequest extends FormRequest
@@ -11,7 +12,7 @@ class UpdateProjectsRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +23,12 @@ class UpdateProjectsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'sometimes|required|string|max:255',
+            'client_name' => 'sometimes|required|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'sometimes|required|in:'. implode(',', ProjectStatusEnum::values()),
+            'created_by' => 'sometimes|required|exists:users,id',
+            'is_archived' => 'boolean',
         ];
     }
 }
