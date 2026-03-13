@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\ArtifactTypeEnum;
+use App\Enums\ArtifactTypeEnum as EnumsArtifactTypeEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -32,7 +33,7 @@ class Artifacts extends Model
     }
     public function getJsonAttribute()
     {
-        if($this->type !== ArtifactTypeEnum::DOMAIN_BREAKDOWN->value) {
+        if($this->type !== EnumsArtifactTypeEnum::DOMAIN_BREAKDOWN->value) {
             return collect($this->content_json);
         }
         $ids = $this->content_json ?? [];

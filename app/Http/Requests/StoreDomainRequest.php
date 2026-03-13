@@ -11,7 +11,7 @@ class StoreDomainRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,10 @@ class StoreDomainRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'required|string|max:255',
+            'objective' => 'required|string',
+            'owner_user_id' => 'required|integer|exists:users,id',
+            'project_id' => 'required|integer|exists:projects,id',
         ];
     }
 }

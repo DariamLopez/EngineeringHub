@@ -13,7 +13,8 @@ class DomainController extends Controller
      */
     public function index()
     {
-        //
+        $domains = Domain::with('owner', 'project')->get();
+        return response()->json($domains);
     }
 
     /**
@@ -29,7 +30,8 @@ class DomainController extends Controller
      */
     public function store(StoreDomainRequest $request)
     {
-        //
+        $domain = Domain::create($request->validated());
+        return response()->json($domain, 201);
     }
 
     /**
@@ -37,7 +39,7 @@ class DomainController extends Controller
      */
     public function show(Domain $domain)
     {
-        //
+        return response()->json($domain);
     }
 
     /**
@@ -53,7 +55,11 @@ class DomainController extends Controller
      */
     public function update(UpdateDomainRequest $request, Domain $domain)
     {
-        //
+        $domain->update($request->validated());
+        return response()->json([
+            'message' => 'Domain updated successfully',
+            'domain' => $domain
+        ], 200);
     }
 
     /**
@@ -61,6 +67,9 @@ class DomainController extends Controller
      */
     public function destroy(Domain $domain)
     {
-        //
+        $domain->delete();
+        return response()->json([
+            'message' => 'Domain deleted successfully'
+        ], 200);
     }
 }

@@ -5,8 +5,10 @@ namespace App\Policies;
 use App\Models\Projects;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Http\Request;
 
 class ProjectsPolicy
+
 {
     /**
      * Determine whether the user can view any models.
@@ -24,7 +26,9 @@ class ProjectsPolicy
      */
     public function view(User $user, Projects $projects): bool
     {
-        //TODO
+        if ($user->can('view_projects')) {
+            return true;
+        }
         return false;
     }
 
@@ -42,12 +46,16 @@ class ProjectsPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Projects $projects): bool
+    public function update(User $user, Projects $projects, Request $request): Response
     {
         if ($user->can('edit_projects')) {
-            return true;
+            if ($request->input('status') === \App\Enums\ProjectStatusEnum::EXECUTION->value) {
+                $gateResponse = $this->moveToExecution($user, $projects);
+                return $gateResponse;
+            }
+            return Response::allow();
         }
-        return false;
+        return Response::deny('This action is unauthorized.');
     }
 
     /**
@@ -75,5 +83,33 @@ class ProjectsPolicy
     public function forceDelete(User $user, Projects $projects): bool
     {
         return false;
+    }
+    /**
+     * Gate 4: No puedes mover el status del proyecto de discovery a execution
+     * a menos que strategic_alignment, big_picture, domain_breakdown y module_matrix estén done
+     */
+    public function moveToExecution(User $user, Projects $project): Response
+    {
+        if ($project->status !== \App\Enums\ProjectStatusEnum::DISCOVERY->value) {
+            return Response::allow(); // Solo aplica al pasar de discovery a execution
+        }
+        $requiredTypes = [
+            \App\Enums\ArtifactTypeEnum::STRATEGIC_ALIGNMENT->value,
+            \App\Enums\ArtifactTypeEnum::BIG_PICTURE->value,
+            \App\Enums\ArtifactTypeEnum::DOMAIN_BREAKDOWN->value,
+            \App\Enums\ArtifactTypeEnum::MODULE_MATRIX->value,
+        ];
+        $artifacts = $project->artifacts()->whereIn('type', $requiredTypes)->get();
+        $missing = [];
+        foreach ($requiredTypes as $type) {
+            $artifact = $artifacts->firstWhere('type', $type);
+            if (!$artifact || $artifact->status !== \App\Enums\ArtifactStatusEnum::DONE->value) {
+                $missing[] = $type;
+            }
+        }
+        if (!empty($missing)) {
+            return Response::deny('No puedes mover el proyecto a execution. Faltan artifacts done: '.implode(', ', $missing));
+        }
+        return Response::allow();
     }
 }

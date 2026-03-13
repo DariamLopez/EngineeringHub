@@ -34,4 +34,8 @@ class Projects extends Model
     {
         return $this->hasMany(Modules::class, 'project_id');
     }
+    public function artifacts()
+    {
+        return $this->hasMany(Artifacts::class, 'project_id');
+    }
 }
