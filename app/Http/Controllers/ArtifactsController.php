@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
 class ArtifactsController extends Controller
+
 {
     use AuthorizesRequests;
     /**
@@ -19,8 +20,8 @@ class ArtifactsController extends Controller
         //$this->authorize('viewAny', Artifacts::class);
 
         $query = Artifacts::query()->with('project');
-        if ($projects_id = $request->query('projects_id')) {
-            $query->where('projects_id', $projects_id);
+        if ($project_id = $request->query('project_id')) {
+            $query->where('project_id', $project_id);
         }
         if ($artifact_type = $request->query('type')) {
             $query->where('type', $artifact_type);
@@ -88,7 +89,20 @@ class ArtifactsController extends Controller
     public function update(UpdateArtifactsRequest $request, Artifacts $artifacts)
     {
         $this->authorize('update', [$artifacts, $request]);
+
+        $before_json = $artifacts->content_json;
+
         $artifacts->update($request->validated());
+
+        $after_json = $artifacts->content_json;
+        \App\Models\AuditTrail::logAction(
+            $request->user()->id,
+            \App\Enums\AuditTrailsEntityTypeEnum::ARTIFACT->value,
+            $artifacts->id,
+            \App\Enums\AuditTrailsActionsEnum::UPDATED->value,
+            $before_json,
+            $after_json
+        );
         return response()->json([
             'message' => 'Artifact updated successfully',
             'data' => $artifacts,

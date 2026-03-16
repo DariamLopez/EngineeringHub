@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\ModuleStatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreModulesRequest extends FormRequest
@@ -11,7 +12,7 @@ class StoreModulesRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +23,20 @@ class StoreModulesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'required|string|max:255',
+            'status' => 'in:' . implode(',', ModuleStatusEnum::values()),
+            'objective' => 'nullable|string',
+            'inputs' => 'nullable|array',
+            'data_structure' => 'nullable|array',
+            'logic_rules' => 'nullable|string',
+            'outputs' => 'nullable|array',
+            'responsability' => 'nullable|string',
+            'failure_scenarios' => 'nullable|string',
+            'audit_trail_requirements' => 'nullable|string',
+            'dependencies' => 'nullable|array',
+            'project_id' => 'required|exists:projects,id',
+            'domain_id' => 'required|exists:domains,id',
+            'version_note' => 'nullable|string',
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\ArtifactStatusEnum;
 use App\Models\Artifacts;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
@@ -51,7 +52,7 @@ class ArtifactsPolicy
     {
         if ($user->can('edit_artifacts')) {
             // Si el status se está cambiando a 'done', aplicamos las gates adicionales
-            if ($request->input('status') === \App\Enums\ArtifactStatusEnum::DONE->value) {
+            if ($request->input('status') === ArtifactStatusEnum::DONE->value) {
                 $gateResponse = $this->markAsDone($user, $artifacts);
                 Log::info('Gate response: '.$gateResponse->message());
                 return $gateResponse;

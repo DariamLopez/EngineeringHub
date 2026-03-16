@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArtifactsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DomainController;
+use App\Http\Controllers\ModulesController;
 use App\Http\Controllers\ProjectsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -35,4 +36,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/domains', [DomainController::class, 'store']);
     Route::put('/domains/{domain}', [DomainController::class, 'update']);
     Route::delete('/domains/{domain}', [DomainController::class, 'destroy']);
+});
+
+//modules routes
+Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::get('/modules', [ModulesController::class, 'index']);
+    Route::get('/modules/{modules}', [ModulesController::class, 'show']);
+    Route::post('/modules', [ModulesController::class, 'store']);
+    Route::put('/modules/{modules}', [ModulesController::class, 'update']);
+    Route::delete('/modules/{modules}', [ModulesController::class, 'destroy']);
 });
