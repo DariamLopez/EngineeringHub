@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AuditTrailsActionsEnum;
+use App\Enums\AuditTrailsEntityTypeEnum;
 use App\Models\Projects;
 use App\Http\Requests\StoreProjectsRequest;
 use App\Http\Requests\UpdateProjectsRequest;
+use App\Models\AuditTrail;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
@@ -69,7 +72,14 @@ class ProjectsController extends Controller
         $data['created_by'] = $request->user()->id;
 
         $projects = Projects::create($data);
-
+        AuditTrail::logAction(
+            $request->user()->id,
+            AuditTrailsEntityTypeEnum::PROJECT->value,
+            $projects->id,
+            AuditTrailsActionsEnum::CREATED->value,
+            null,
+            null
+        );
         return response()->json($projects, 201);
     }
 
@@ -99,6 +109,14 @@ class ProjectsController extends Controller
         $this->authorize('update', $projects);
 
         $projects->update($request->validated());
+        AuditTrail::logAction(
+            $request->user()->id,
+            AuditTrailsEntityTypeEnum::PROJECT->value,
+            $projects->id,
+            AuditTrailsActionsEnum::UPDATED->value,
+            null,
+            null
+        );
         return response()->json([
             'message' => 'Project update successfully',
             'project' => $projects
@@ -112,6 +130,14 @@ class ProjectsController extends Controller
     {
         $this->authorize('delete', $projects);
         $projects->delete();
+        AuditTrail::logAction(
+            request()->user()->id,
+            AuditTrailsEntityTypeEnum::PROJECT->value,
+            $projects->id,
+            AuditTrailsActionsEnum::DELETED->value,
+            null,
+            null
+        );
         return response()->json([
             'message' => 'Project deleted successfully'
         ]);

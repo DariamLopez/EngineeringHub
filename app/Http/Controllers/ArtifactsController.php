@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AuditTrailsActionsEnum;
+use App\Enums\AuditTrailsEntityTypeEnum;
 use App\Models\Artifacts;
 use App\Http\Requests\StoreArtifactsRequest;
 use App\Http\Requests\UpdateArtifactsRequest;
+use App\Models\AuditTrail;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
@@ -14,6 +17,7 @@ class ArtifactsController extends Controller
     use AuthorizesRequests;
     /**
      * Display a listing of the resource.
+     * TODO agregar permisos y request
      */
     public function index(Request $request)
     {
@@ -60,10 +64,19 @@ class ArtifactsController extends Controller
     {
         $this->authorize('create', Artifacts::class);
         $artifact = Artifacts::create($request->validated());
+        $after_json = $artifact->content_json;
+        AuditTrail::logAction(
+            $request->user()->id,
+            AuditTrailsEntityTypeEnum::ARTIFACT->value,
+            $artifact->id,
+            AuditTrailsActionsEnum::CREATED->value,
+            null,
+            $after_json
+        );
         return response()->json([
             'message' => 'Artifact created successfully',
             'data' => $artifact,
-            ], 201);
+        ], 201);
     }
 
     /**
@@ -89,24 +102,28 @@ class ArtifactsController extends Controller
     public function update(UpdateArtifactsRequest $request, Artifacts $artifacts)
     {
         $this->authorize('update', [$artifacts, $request]);
-
+        $action = '';
+        if ($request->validated('status') != $artifacts->status) {
+            $action = AuditTrailsActionsEnum::STATUS_CHANGED->value;
+        } else {
+            $action = AuditTrailsActionsEnum::UPDATED->value;
+        }
         $before_json = $artifacts->content_json;
-
         $artifacts->update($request->validated());
-
         $after_json = $artifacts->content_json;
-        \App\Models\AuditTrail::logAction(
+        AuditTrail::logAction(
             $request->user()->id,
-            \App\Enums\AuditTrailsEntityTypeEnum::ARTIFACT->value,
+            AuditTrailsEntityTypeEnum::ARTIFACT->value,
             $artifacts->id,
-            \App\Enums\AuditTrailsActionsEnum::UPDATED->value,
+            $action,
             $before_json,
             $after_json
         );
+
         return response()->json([
             'message' => 'Artifact updated successfully',
             'data' => $artifacts,
-            ], 200);
+        ], 200);
     }
 
     /**
@@ -114,10 +131,19 @@ class ArtifactsController extends Controller
      */
     public function destroy(Artifacts $artifacts)
     {
+        $before_json = $artifacts->content_json;
+        AuditTrail::logAction(
+            request()->user()->id,
+            AuditTrailsEntityTypeEnum::ARTIFACT->value,
+            $artifacts->id,
+            AuditTrailsActionsEnum::DELETED->value,
+            $before_json,
+            null
+        );
         $this->authorize('delete', $artifacts);
         $artifacts->delete();
         return response()->json([
             'message' => 'Artifact deleted successfully',
-            ], 200);
+        ], 200);
     }
 }

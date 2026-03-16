@@ -9,6 +9,7 @@ enum AuditTrailsActionsEnum: string
     case STATUS_CHANGED = 'status_changed';
     case VALIDATED = 'validated';
     case COMPLETED = 'completed';
+    case DELETED = 'deleted';
     public static function values(): array
     {
         return [
@@ -17,6 +18,7 @@ enum AuditTrailsActionsEnum: string
             self::STATUS_CHANGED->value,
             self::VALIDATED->value,
             self::COMPLETED->value,
+            self::DELETED->value,
         ];
     }
     public function value(): string

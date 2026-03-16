@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArtifactsController;
+use App\Http\Controllers\AuditTrailController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\ModulesController;
@@ -45,4 +46,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/modules', [ModulesController::class, 'store']);
     Route::put('/modules/{modules}', [ModulesController::class, 'update']);
     Route::delete('/modules/{modules}', [ModulesController::class, 'destroy']);
+});
+
+//audit trails routes
+Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::get('/audit-trails', [AuditTrailController::class, 'index']);
 });

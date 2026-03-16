@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\AuditTrail;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Log as FacadesLog;
 
 class AuditTrailPolicy
 {
@@ -13,6 +14,9 @@ class AuditTrailPolicy
      */
     public function viewAny(User $user): bool
     {
+        if ($user->roles->first()->name == 'admin') {
+            return true;
+        }
         return false;
     }
 

@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class AuditTrail extends Model
 {
+    /** @use HasFactory<\Database\Factories\AuditTrailFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'actor_user_id',
         'entity_type',
@@ -15,8 +18,14 @@ class AuditTrail extends Model
         'before_json',
         'after_json'
     ];
-    /** @use HasFactory<\Database\Factories\AuditTrailFactory> */
-    use HasFactory;
+    protected $casts = [
+        'before_json' => 'array',
+        'after_json' => 'array',
+    ];
+    public function actor()
+    {
+        return $this->belongsTo(User::class, 'actor_user_id');
+    }
     /**
      * Registra una acción en la tabla audit_trails
      * @param int|null $actorUserId

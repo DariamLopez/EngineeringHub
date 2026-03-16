@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AuditTrailsActionsEnum;
+use App\Enums\AuditTrailsEntityTypeEnum;
+use App\Enums\ModuleStatusEnum;
 use App\Models\Modules;
 use App\Http\Requests\StoreModulesRequest;
 use App\Http\Requests\UpdateModulesRequest;
+use App\Models\AuditTrail;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
@@ -58,11 +62,19 @@ class ModulesController extends Controller
     public function store(StoreModulesRequest $request)
     {
         $this->authorize('create', Modules::class);
-         $modules = Modules::create($request->validated());
-         return response()->json([
-             'message' => 'Module created successfully',
-             'data' => $modules
-         ], 201);
+        $modules = Modules::create($request->validated());
+        AuditTrail::logAction(
+            $request->user()->id,
+            AuditTrailsEntityTypeEnum::MODULE->value,
+            $modules->id,
+            AuditTrailsActionsEnum::CREATED->value,
+            null,
+            null
+        );
+        return response()->json([
+            'message' => 'Module created successfully',
+            'data' => $modules
+        ], 201);
     }
 
     /**
@@ -88,7 +100,21 @@ class ModulesController extends Controller
     public function update(UpdateModulesRequest $request, Modules $modules)
     {
         $this->authorize('update', [$modules, $request]);
+        $action = '';
+        if ($request->validated('status') == ModuleStatusEnum::VALIDATED->value) {
+            $action = AuditTrailsActionsEnum::VALIDATED->value;
+        } else {
+            $action = AuditTrailsActionsEnum::UPDATED->value;
+        }
         $modules->update($request->validated());
+        AuditTrail::logAction(
+            $request->user()->id,
+            AuditTrailsEntityTypeEnum::MODULE->value,
+            $modules->id,
+            AuditTrailsActionsEnum::from($action)->value,
+            null,
+            null
+        );
         return response()->json([
             'message' => 'Module updated successfully',
             'data' => $modules
@@ -102,6 +128,14 @@ class ModulesController extends Controller
     {
         $this->authorize('delete', $modules);
         $modules->delete();
+        AuditTrail::logAction(
+            request()->user()->id,
+            AuditTrailsEntityTypeEnum::MODULE->value,
+            $modules->id,
+            AuditTrailsActionsEnum::DELETED->value,
+            null,
+            null
+        );
         return response()->json([
             'message' => 'Module deleted successfully'
         ]);
