@@ -14,6 +14,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\Ship;
 use App\Models\User;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -23,13 +24,15 @@ use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
+    use AuthorizesRequests;
     /*
-     * TODO Añadir permisos para registrar usuario, solo admin puede registrar usuarios
+     *
      * $request: name, email, password, role
      */
     public function register(RegisterRequest $request)
     {
-        $data = $request;
+        $this->authorize('create', User::class);
+        $data = $request->validated();
 
         $user = User::create([
             'name' => $data['name'],
@@ -97,16 +100,16 @@ class AuthController extends Controller
         return response()->json(['message' => 'Logged out successfully.'], 200);
     }
 
-    //TODO Añadir permisos para eliminar usuario, solo admin puede eliminar usuarios
     public function deleteUser(Request $request)
     {
+        $this->authorize('delete', User::class);
         $user = $request->user();
         $user->tokens()->delete(); // Revocar todos los tokens
         $user->delete(); // Eliminar usuario
         return response()->json([
             'message' => 'User deleted successfully.',
             'user' => $user
-            ], 200);
+        ], 200);
     }
 
     public function me(Request $request)
@@ -138,8 +141,7 @@ class AuthController extends Controller
     }
     protected function abilitiesForRole($role): array
     {
-        $role = Role::findByName($role);
+        $role = Role::findByName($role, 'web');
         return $role->permissions->pluck('name')->toArray();
     }
 }
-

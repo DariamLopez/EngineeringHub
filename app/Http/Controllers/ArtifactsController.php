@@ -9,7 +9,7 @@ use App\Http\Requests\StoreArtifactsRequest;
 use App\Http\Requests\UpdateArtifactsRequest;
 use App\Models\AuditTrail;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Http\Request;
+use App\Http\Requests\IndexArtifactsRequest;
 
 class ArtifactsController extends Controller
 
@@ -17,16 +17,14 @@ class ArtifactsController extends Controller
     use AuthorizesRequests;
     /**
      * Display a listing of the resource.
-     * TODO agregar permisos y request
+     *
      */
-    public function index(Request $request)
+    public function index(IndexArtifactsRequest $request)
     {
-        //$this->authorize('viewAny', Artifacts::class);
+        $this->authorize('viewAny', Artifacts::class);
 
-        $query = Artifacts::query()->with('project');
-        if ($project_id = $request->query('project_id')) {
-            $query->where('project_id', $project_id);
-        }
+        $project_id = $request->validated('project_id');
+        $query = Artifacts::query()->with('project')->where('project_id', $project_id);
         if ($artifact_type = $request->query('type')) {
             $query->where('type', $artifact_type);
         }
@@ -45,7 +43,6 @@ class ArtifactsController extends Controller
         } else {
             $artifact = $query->orderBy($order_by, $order_dir)->get();
         }
-        //$artifact = Artifact::all();
         return response()->json($artifact);
     }
 
