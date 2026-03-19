@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ProjectStatusEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +18,12 @@ class ProjectsFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => fake()->sentence(3),
+            'client_name' => fake()->company(),
+            'description' => fake()->paragraph(),
+            'status' => ProjectStatusEnum::DRAFT->value,
+            'created_by' => \App\Models\User::factory(),
+            'is_archived' => false,
         ];
     }
 }

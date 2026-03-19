@@ -106,7 +106,7 @@ class ProjectsController extends Controller
      */
     public function update(UpdateProjectsRequest $request, Projects $projects)
     {
-        $this->authorize('update', $projects);
+        $this->authorize('update', [$projects, $request]);
 
         $projects->update($request->validated());
         AuditTrail::logAction(

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ModuleStatusEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +18,20 @@ class ModulesFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => fake()->word(),
+            'status' => ModuleStatusEnum::DRAFT->value,
+            'objective' => fake()->sentence(),
+            'inputs' => [],
+            'outputs' => [],
+            'data_structure' => [],
+            'logic_rules' => fake()->sentence(),
+            'responsability' => fake()->sentence(),
+            'failure_scenarios' => fake()->sentence(),
+            'audit_trail_requirements' => fake()->sentence(),
+            'dependencies' => [],
+            'version_note' => fake()->sentence(),
+            'domain_id' => \App\Models\Domain::factory(),
+            'project_id' => \App\Models\Projects::factory(),
         ];
     }
 }
