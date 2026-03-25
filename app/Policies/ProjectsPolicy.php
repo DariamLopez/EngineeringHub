@@ -108,7 +108,7 @@ class ProjectsPolicy
             }
         }
         if (!empty($missing)) {
-            return Response::deny('No puedes mover el proyecto a execution. Faltan artifacts done: '.implode(', ', $missing));
+            return Response::deny('You cannot move the project to execution. The following required aspects must be completed: '.implode(', ', $missing));
         }
         return Response::allow();
     }

@@ -27,7 +27,6 @@ class UpdateProjectsRequest extends FormRequest
             'client_name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'sometimes|required|in:'. implode(',', ProjectStatusEnum::values()),
-            'created_by' => 'sometimes|required|exists:users,id',
             'is_archived' => 'boolean',
         ];
     }
