@@ -26,6 +26,11 @@ class AuditTrail extends Model
     {
         return $this->belongsTo(User::class, 'actor_user_id');
     }
+
+    public function entity()
+    {
+        return $this->morphTo('entity', 'entity_type', 'entity_id');
+    }
     /**
      * Registra una acción en la tabla audit_trails
      * @param int|null $actorUserId

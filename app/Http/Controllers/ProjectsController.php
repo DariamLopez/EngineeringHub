@@ -129,13 +129,14 @@ class ProjectsController extends Controller
     public function destroy(Projects $projects)
     {
         $this->authorize('delete', $projects);
+        $beforeData = $projects->toArray();
         $projects->delete();
         AuditTrail::logAction(
             request()->user()->id,
             AuditTrailsEntityTypeEnum::PROJECT->value,
             $projects->id,
             AuditTrailsActionsEnum::DELETED->value,
-            null,
+            $beforeData,
             null
         );
         return response()->json([

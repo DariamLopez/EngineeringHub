@@ -18,7 +18,7 @@ class AuditTrailController extends Controller
     {
         $this->authorize('viewAny', AuditTrail::class);
 
-        $query = AuditTrail::query()->with('actor');
+        $query = AuditTrail::query()->with(['actor.roles', 'entity']);
         if ($actor_user_id = $request->query('actor_user_id')) {
             $query->where('actor_user_id', $actor_user_id);
         }
