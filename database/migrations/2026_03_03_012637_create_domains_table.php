@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('domains', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->text('description')->nullable();
             $table->text('objective')->nullable();
             $table->foreignId('owner_user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('project_id')->constrained()->onDelete('cascade');

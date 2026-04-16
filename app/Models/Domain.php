@@ -11,6 +11,7 @@ class Domain extends Model
     use HasFactory;
     protected $fillable = [
         'name',
+        'description',
         'objective',
         'owner_user_id',
         'project_id'

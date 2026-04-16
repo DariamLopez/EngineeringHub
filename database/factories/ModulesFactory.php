@@ -25,7 +25,7 @@ class ModulesFactory extends Factory
             'outputs' => [],
             'data_structure' => [],
             'logic_rules' => fake()->sentence(),
-            'responsability' => fake()->sentence(),
+            'responsibility' => fake()->sentence(),
             'failure_scenarios' => fake()->sentence(),
             'audit_trail_requirements' => fake()->sentence(),
             'dependencies' => [],

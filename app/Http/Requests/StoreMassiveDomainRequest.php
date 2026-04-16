@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreDomainRequest extends FormRequest
+class StoreMassiveDomainRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +22,12 @@ class StoreDomainRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'objective' => 'nullable|string',
-            'description' => 'nullable|string',
-            'owner_user_id' => 'nullable|integer|exists:users,id',
             'project_id' => 'required|integer|exists:projects,id',
+            'domains' => 'required|array',
+            'domains.*.name' => 'required|string|max:255',
+            'domains.*.objective' => 'nullable|string',
+            'domains.*.owner_user_id' => 'nullable|integer|exists:users,id',
+            'domains.*.description' => 'nullable|string',
         ];
     }
 }

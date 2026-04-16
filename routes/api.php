@@ -12,7 +12,11 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 Route::post('/register', [AuthController::class, 'register'])->middleware('auth:sanctum')->name('register');
-
+//Users Route
+Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/users', [AuthController::class, 'users'])->name('user');
+});
 // projects routes
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/projects', [ProjectsController::class, 'index']);
@@ -36,16 +40,22 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/domains', [DomainController::class, 'index']);
     Route::get('/domains/{domain}', [DomainController::class, 'show']);
     Route::post('/domains', [DomainController::class, 'store']);
+    Route::post('/domains/massive', [DomainController::class, 'massiveStore']);
+    Route::put('/domains/massive', [DomainController::class, 'massiveUpdate']);
     Route::put('/domains/{domain}', [DomainController::class, 'update']);
+    Route::delete('/domains/massive', [DomainController::class, 'massiveDestroy']);
     Route::delete('/domains/{domain}', [DomainController::class, 'destroy']);
-});
+    });
 
 //modules routes
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/modules', [ModulesController::class, 'index']);
     Route::get('/modules/{modules}', [ModulesController::class, 'show']);
     Route::post('/modules', [ModulesController::class, 'store']);
+    Route::post('/modules/massive', [ModulesController::class, 'massiveStore']);
+    Route::put('/modules/massive', [ModulesController::class, 'massiveUpdate']);
     Route::put('/modules/{modules}', [ModulesController::class, 'update']);
+    Route::delete('/modules/massive', [ModulesController::class, 'massiveDestroy']);
     Route::delete('/modules/{modules}', [ModulesController::class, 'destroy']);
 });
 

@@ -10,6 +10,8 @@ use App\Http\Requests\UpdateArtifactsRequest;
 use App\Models\AuditTrail;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Requests\IndexArtifactsRequest;
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class ArtifactsController extends Controller
 
@@ -24,7 +26,8 @@ class ArtifactsController extends Controller
         $this->authorize('viewAny', Artifacts::class);
 
         $project_id = $request->validated('project_id');
-        $query = Artifacts::query()->with('project')->where('project_id', $project_id);
+        //Log::info("Fetching artifacts for project_id: $project_id with filters: " . json_encode($request->validated()));
+        $query = Artifacts::query()->with('owner')->with('project')->where('project_id', $project_id);
         if ($artifact_type = $request->query('type')) {
             $query->where('type', $artifact_type);
         }
@@ -43,6 +46,13 @@ class ArtifactsController extends Controller
         } else {
             $artifact = $query->orderBy($order_by, $order_dir)->get();
         }
+
+        $items = $per_page ? $artifact->getCollection() : $artifact;
+        $items->transform(function ($item) {
+            $item->content_json = $item->json;
+            return $item;
+        });
+
         return response()->json($artifact);
     }
 
@@ -59,8 +69,11 @@ class ArtifactsController extends Controller
      */
     public function store(StoreArtifactsRequest $request)
     {
-        $this->authorize('create', Artifacts::class);
-        $artifact = Artifacts::create($request->validated());
+        $data = $request->validated();
+        Log::info("Store Artifacts Request Data", $data);
+        $this->authorize('create', [Artifacts::class, $request]);
+        $data['owner_user_id'] = $request->user()->id;
+        $artifact = Artifacts::create($data);
         $after_json = $artifact->content_json;
         AuditTrail::logAction(
             $request->user()->id,
@@ -82,6 +95,8 @@ class ArtifactsController extends Controller
     public function show(Artifacts $artifacts)
     {
         $this->authorize('view', $artifacts);
+        $artifacts->load(['owner', 'project']);
+        $artifacts->content_json = $artifacts->json;
         return response()->json($artifacts);
     }
 

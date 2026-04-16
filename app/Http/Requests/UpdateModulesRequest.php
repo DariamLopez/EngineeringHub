@@ -30,7 +30,7 @@ class UpdateModulesRequest extends FormRequest
             'data_structure' => 'nullable|array',
             'logic_rules' => 'nullable|string',
             'outputs' => 'nullable|array',
-            'responsability' => 'nullable|string',
+            'responsibility' => 'nullable|string',
             'failure_scenarios' => 'nullable|string',
             'audit_trail_requirements' => 'nullable|string',
             'dependencies' => 'nullable|array',

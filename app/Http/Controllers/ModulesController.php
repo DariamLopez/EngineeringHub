@@ -5,12 +5,16 @@ namespace App\Http\Controllers;
 use App\Enums\AuditTrailsActionsEnum;
 use App\Enums\AuditTrailsEntityTypeEnum;
 use App\Enums\ModuleStatusEnum;
+use App\Http\Requests\DestroyMassiveModulesRequest;
+use App\Http\Requests\StoreMassiveModulesRequest;
 use App\Models\Modules;
 use App\Http\Requests\StoreModulesRequest;
+use App\Http\Requests\UpdateMassiveModules;
 use App\Http\Requests\UpdateModulesRequest;
 use App\Models\AuditTrail;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ModulesController extends Controller
 {
@@ -22,7 +26,7 @@ class ModulesController extends Controller
     {
         //$this->authorize('viewAny', Artifacts::class);
 
-        $query = Modules::query()->with('project');
+        $query = Modules::query()->with('project')->with('domain');
         if ($project_id = $request->query('project_id')) {
             $query->where('project_id', $project_id);
         }
@@ -77,12 +81,45 @@ class ModulesController extends Controller
         ], 201);
     }
 
+    public function massiveStore(StoreMassiveModulesRequest $request)
+    {
+        $this->authorize('create', Modules::class);
+        $data = $request->validated();
+
+        $createdModules = [];
+        foreach ($data['modules'] as $moduleData) {
+            $module = Modules::create([
+                'project_id' => $data['project_id'],
+                'name' => $moduleData['name'],
+                'domain_id' => $moduleData['domain_id'],
+                'priority' => $moduleData['priority'],
+                'phase' => $moduleData['phase'],
+                'status' => ModuleStatusEnum::DRAFT->value,
+            ]);
+            $createdModules[] = $module;
+            AuditTrail::logAction(
+                $request->user()->id,
+                AuditTrailsEntityTypeEnum::MODULE->value,
+                $module->id,
+                AuditTrailsActionsEnum::CREATED->value,
+                null,
+                null
+            );
+        }
+
+        return response()->json([
+            'message' => 'Modules created successfully',
+            'modules' => $createdModules
+        ], 201);
+    }
+
     /**
      * Display the specified resource.
      */
     public function show(Modules $modules)
     {
         $this->authorize('view', $modules);
+        $modules->load(['project', 'domain']);
         return response()->json($modules);
     }
 
@@ -121,6 +158,35 @@ class ModulesController extends Controller
         ]);
     }
 
+    public function massiveUpdate(UpdateMassiveModules $request)
+    {
+        //TODO falta el autorize que aqui cambia porq en la request viene un array de modules
+        Log::info("Received request to update multiple modules with data: " . json_encode($request->input()));
+        $data = $request->validated();
+        Log::info("Received request to update multiple modules with data: " . json_encode($data));
+        $updatedModules = [];
+        foreach ($data['modules'] as $moduleData) {
+            $module = Modules::find($moduleData['id']);
+            if ($module) {
+                $module->update($moduleData);
+                $updatedModules[] = $module;
+                AuditTrail::logAction(
+                    request()->user()->id,
+                    AuditTrailsEntityTypeEnum::MODULE->value,
+                    $module->id,
+                    AuditTrailsActionsEnum::UPDATED->value,
+                    null,
+                    null
+                );
+            }
+        }
+
+        return response()->json([
+            'message' => 'Modules updated successfully',
+            'modules' => $updatedModules
+        ]);
+    }
+
     /**
      * Remove the specified resource from storage.
      */
@@ -139,5 +205,15 @@ class ModulesController extends Controller
         return response()->json([
             'message' => 'Module deleted successfully'
         ]);
+    }
+
+    public function massiveDestroy(DestroyMassiveModulesRequest $request)
+    {
+        $this->authorize('deleteAny', Modules::class);
+        $data = $request->validated();
+        $deletedCount = Modules::where('project_id', $data['project_id'])->whereIn('id', $data['module_ids'])->delete();
+        return response()->json([
+            'message' => "Deleted $deletedCount modules for project_id: {$data['project_id']}"
+        ], 200);
     }
 }

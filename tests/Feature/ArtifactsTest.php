@@ -58,6 +58,28 @@ class ArtifactsTest extends TestCase
         $this->assertDatabaseHas('artifacts', ['project_id' => $project->id, 'type' => 'big_picture']);
     }
 
+    public function test_admin_can_list_domain_breakdown_artifact_and_resolve_domain_ids(): void
+    {
+        $admin = $this->createAdmin();
+        $project = Projects::factory()->create(['created_by' => $admin->id]);
+        $domainA = \App\Models\Domain::factory()->create(['project_id' => $project->id]);
+        $domainB = \App\Models\Domain::factory()->create(['project_id' => $project->id]);
+
+        Artifacts::factory()->create([
+            'project_id' => $project->id,
+            'type' => ArtifactTypeEnum::DOMAIN_BREAKDOWN->value,
+            'content_json' => ['domains' => [$domainA->id, $domainB->id]],
+        ]);
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->getJson("/api/artifacts?project_id={$project->id}");
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(1);
+        $response->assertJsonPath('0.content_json.0.id', $domainA->id);
+        $response->assertJsonPath('0.content_json.1.id', $domainB->id);
+    }
+
     public function test_create_artifact_validates_content_json_extra_fields(): void
     {
         $admin = $this->createAdmin();

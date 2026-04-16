@@ -28,9 +28,8 @@ class UpdateArtifactsRequest extends FormRequest
     {
         $rules = [
 
-            'status' => 'sometimes|in:'. implode(',', ArtifactStatusEnum::values()),
+            'status' => 'sometimes|in:' . implode(',', ArtifactStatusEnum::values()),
             'owner_user_id' => 'nullable|exists:users,id',
-            'completed_at' => 'nullable|date',
             'content_json' => 'sometimes|array',
         ];
 
@@ -50,7 +49,7 @@ class UpdateArtifactsRequest extends FormRequest
             case ArtifactTypeEnum::BIG_PICTURE->value:
                 $rules["$jsonPrefix.ecosystem_vision"] = 'sometimes|string';
                 $rules["$jsonPrefix.impacted_domains"] = 'sometimes|array';
-                $rules["$jsonPrefix.impacted_domains.*"] = 'string';
+                $rules["$jsonPrefix.impacted_domains.*"] = 'integer|exists:domains,id';
                 $rules["$jsonPrefix.success_definition"] = 'sometimes|string';
                 break;
             case ArtifactTypeEnum::DOMAIN_BREAKDOWN->value:
@@ -59,10 +58,11 @@ class UpdateArtifactsRequest extends FormRequest
                 break;
             case ArtifactTypeEnum::MODULE_MATRIX->value:
                 $rules["$jsonPrefix.modules_overview"] = 'sometimes|array';
-                $rules["$jsonPrefix.modules_overview.*.name"] = 'sometimes|string';
+                $rules["$jsonPrefix.modules_overview.*"] = 'integer|exists:modules,id';
+                /* $rules["$jsonPrefix.modules_overview.*.name"] = 'sometimes|string';
                 $rules["$jsonPrefix.modules_overview.*.domain"] = 'sometimes|string';
                 $rules["$jsonPrefix.modules_overview.*.priority"] = 'sometimes';
-                $rules["$jsonPrefix.modules_overview.*.phase"] = 'sometimes';
+                $rules["$jsonPrefix.modules_overview.*.phase"] = 'sometimes'; */
                 break;
             case ArtifactTypeEnum::SYSTEM_ARCHITECTURE->value:
                 $rules["$jsonPrefix.auth_model"] = 'sometimes|string';
@@ -136,7 +136,7 @@ class UpdateArtifactsRequest extends FormRequest
             }
             $extraFields = array_diff(array_keys($content), $allowedFields);
             if (count($extraFields) > 0) {
-                $validator->errors()->add('content_json', 'Los siguientes campos no están permitidos para el tipo seleccionado: '.implode(', ', $extraFields));
+                $validator->errors()->add('content_json', 'Los siguientes campos no están permitidos para el tipo seleccionado: ' . implode(', ', $extraFields));
             }
         });
     }

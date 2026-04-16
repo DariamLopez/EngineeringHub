@@ -53,9 +53,30 @@ class ModulesPolicy
                 $gateResponse = $this->markAsValidated($user, $modules);
                 return $gateResponse;
             }
+            if ($request->input('status') === \App\Enums\ModuleStatusEnum::READY_FOR_BUILD->value) {
+                $gateResponse = $this->markAsValidated($user, $modules);
+                if ($gateResponse->allowed()) {
+                    //Si el módulo es validado, también se puede marcar como listo para construcción
+                    return Response::allow();
+                } else {
+                    //Si el módulo no es validado, no se puede marcar como listo para construcción
+                    return Response::deny('Module must be validated before it can be marked as ready for build.');
+                }
+            }
             return Response::allow();
         }
         return Response::deny('This action is unautorized');
+    }
+
+    /**
+     * Determine whether the user can delete any model.
+     */
+    public function deleteAny(User $user): bool
+    {
+        if ($user->can('edit_modules')) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -97,8 +118,8 @@ class ModulesPolicy
         if($modules->outputs == null || count($modules->outputs) == 0) {
             $errors[] = 'At least one output is required to validate the module.';
         }
-        if($modules->responsability == null) {
-            $errors[] = 'Responsability is required to validate the module.';
+        if($modules->responsibility == null) {
+            $errors[] = 'Responsibility is required to validate the module.';
         }
         if (!empty($errors)) {
             return Response::deny(implode(' ', $errors));

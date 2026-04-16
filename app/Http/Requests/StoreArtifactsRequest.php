@@ -26,10 +26,8 @@ class StoreArtifactsRequest extends FormRequest
     {
         $rules = [
             'type' => 'required|in:'. implode(',', ArtifactTypeEnum::values()),
-            'status' => 'required|in:'. implode(',', ArtifactStatusEnum::values()),
             'owner_user_id' => 'nullable|exists:users,id',
             'project_id' => 'required|exists:projects,id',
-            'completed_at' => 'nullable|date',
             'content_json' => 'required|array',
         ];
 
@@ -49,7 +47,7 @@ class StoreArtifactsRequest extends FormRequest
             case ArtifactTypeEnum::BIG_PICTURE->value:
                 $rules["$jsonPrefix.ecosystem_vision"] = 'required|string';
                 $rules["$jsonPrefix.impacted_domains"] = 'required|array';
-                $rules["$jsonPrefix.impacted_domains.*"] = 'string';
+                $rules["$jsonPrefix.impacted_domains.*"] = 'integer|exists:domains,id';
                 $rules["$jsonPrefix.success_definition"] = 'required|string';
                 break;
             case ArtifactTypeEnum::DOMAIN_BREAKDOWN->value:
@@ -58,10 +56,11 @@ class StoreArtifactsRequest extends FormRequest
                 break;
             case ArtifactTypeEnum::MODULE_MATRIX->value:
                 $rules["$jsonPrefix.modules_overview"] = 'required|array';
-                $rules["$jsonPrefix.modules_overview.*.name"] = 'required|string';
-                $rules["$jsonPrefix.modules_overview.*.domain"] = 'required|string';
-                $rules["$jsonPrefix.modules_overview.*.priority"] = 'required|string';
-                $rules["$jsonPrefix.modules_overview.*.phase"] = 'required|string';
+                $rules["$jsonPrefix.modules_overview.*"] = 'integer|exists:modules,id';
+                //$rules["$jsonPrefix.modules_overview.*.name"] = 'required|string';
+                //$rules["$jsonPrefix.modules_overview.*.domain"] = 'required|integer|exists:domains,id';
+                //$rules["$jsonPrefix.modules_overview.*.priority"] = 'required|string';
+                //$rules["$jsonPrefix.modules_overview.*.phase"] = 'required|string';
                 break;
             case ArtifactTypeEnum::SYSTEM_ARCHITECTURE->value:
                 $rules["$jsonPrefix.auth_model"] = 'required|string';

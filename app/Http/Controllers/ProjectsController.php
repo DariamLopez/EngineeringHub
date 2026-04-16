@@ -22,7 +22,7 @@ class ProjectsController extends Controller
     {
         $this->authorize('viewAny', Projects::class);
 
-        $query = Projects::with('createdBy')->with('modules')->with('domains')->with('artifacts');
+        $query = Projects::with('createdBy')->with('modules.domain')->with('domains')->with('artifacts');
         if ($projects_id = $request->query('projects_id')) {
             $query->where('projects_id', $projects_id);
         }

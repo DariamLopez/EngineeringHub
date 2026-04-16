@@ -30,13 +30,15 @@ class StoreModulesRequest extends FormRequest
             'data_structure' => 'nullable|array',
             'logic_rules' => 'nullable|string',
             'outputs' => 'nullable|array',
-            'responsability' => 'nullable|string',
+            'responsibility' => 'nullable|string',
             'failure_scenarios' => 'nullable|string',
             'audit_trail_requirements' => 'nullable|string',
             'dependencies' => 'nullable|array',
+            'version_note' => 'nullable|string',
+            'priority' => 'nullable|string',
+            'phase' => 'nullable|string',
             'project_id' => 'required|exists:projects,id',
             'domain_id' => 'required|exists:domains,id',
-            'version_note' => 'nullable|string',
         ];
     }
 }

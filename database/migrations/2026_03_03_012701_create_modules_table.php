@@ -22,11 +22,14 @@ return new class extends Migration
             $table->json('data_structure')->nullable();
             $table->text('logic_rules')->nullable();
             $table->json('outputs')->nullable();
-            $table->text('responsability')->nullable();
+            $table->text('responsibility')->nullable();
             $table->text('failure_scenarios')->nullable();
             $table->text('audit_trail_requirements')->nullable();
             $table->json('dependencies')->nullable(); //json array of module_ids
             $table->string('version_note')->nullable();
+
+            $table->string('priority')->nullable();
+            $table->string('phase')->nullable();
 
             $table->foreignId('domain_id')->constrained()->onDelete('cascade');
             $table->foreignId('project_id')->constrained()->onDelete('cascade');

@@ -116,6 +116,13 @@ class AuthController extends Controller
     {
         return response()->json($request->user());
     }
+    public function users(Request $request)
+    {
+        //TODO Implementar policy, solo los admins pueden ver la lista de usuarios
+        $this->authorize('viewAny', User::class);
+        $users = User::with('roles', 'permissions')->get();
+        return response()->json($users);
+    }
 
     protected function abilitiesForUser(User $user): array
     {

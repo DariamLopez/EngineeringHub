@@ -22,4 +22,12 @@ class RegisterUserPolicy
     {
         return $user->roles->first()->name == 'admin';
     }
+
+    public function viewAny(User $user): bool
+    {
+        if ($user->can('view_users')) {
+            return true;
+        }
+        return false;
+    }
 }
