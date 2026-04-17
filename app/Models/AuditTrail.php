@@ -48,8 +48,8 @@ class AuditTrail extends Model
             'entity_type' => $entityType,
             'entity_id' => $entityId,
             'action' => $action,
-            'before_json' => $beforeJson ? json_encode($beforeJson) : null,
-            'after_json' => $afterJson ? json_encode($afterJson) : null,
+            'before_json' => $beforeJson,
+            'after_json' => $afterJson,
         ]);
     }
 }

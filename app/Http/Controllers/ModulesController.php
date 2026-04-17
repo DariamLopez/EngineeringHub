@@ -143,14 +143,15 @@ class ModulesController extends Controller
         } else {
             $action = AuditTrailsActionsEnum::UPDATED->value;
         }
+        $old_module = $modules->replicate();
         $modules->update($request->validated());
         AuditTrail::logAction(
             $request->user()->id,
             AuditTrailsEntityTypeEnum::MODULE->value,
             $modules->id,
             AuditTrailsActionsEnum::from($action)->value,
-            null,
-            null
+            $old_module->toArray(),
+            $modules->toArray()
         );
         return response()->json([
             'message' => 'Module updated successfully',
@@ -168,6 +169,7 @@ class ModulesController extends Controller
         foreach ($data['modules'] as $moduleData) {
             $module = Modules::find($moduleData['id']);
             if ($module) {
+                $old_module = $module->replicate();
                 $module->update($moduleData);
                 $updatedModules[] = $module;
                 AuditTrail::logAction(
@@ -175,8 +177,8 @@ class ModulesController extends Controller
                     AuditTrailsEntityTypeEnum::MODULE->value,
                     $module->id,
                     AuditTrailsActionsEnum::UPDATED->value,
-                    null,
-                    null
+                    $old_module->toArray(),
+                    $module->toArray()
                 );
             }
         }
@@ -199,7 +201,7 @@ class ModulesController extends Controller
             AuditTrailsEntityTypeEnum::MODULE->value,
             $modules->id,
             AuditTrailsActionsEnum::DELETED->value,
-            null,
+            $modules->toArray(),
             null
         );
         return response()->json([

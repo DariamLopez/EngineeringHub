@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AuditTrailsEntityTypeEnum;
 use App\Models\AuditTrail;
+use App\Models\Artifacts;
+use App\Models\Modules;
 use App\Http\Requests\StoreAuditTrailRequest;
 use App\Http\Requests\UpdateAuditTrailRequest;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -30,6 +33,38 @@ class AuditTrailController extends Controller
         }
         if ($entity_id = $request->query('entity_id')) {
             $query->where('entity_id', $entity_id);
+        }
+        if ($project_id = $request->query('project_id')) {
+            // IDs de entidades que aún existen en la BD
+            $moduleIds = Modules::where('project_id', $project_id)->pluck('id');
+            $artifactIds = Artifacts::where('project_id', $project_id)->pluck('id');
+
+            // IDs de entidades ya eliminadas: se recuperan desde before_json de sus audits de delete
+            $deletedModuleIds = AuditTrail::where('entity_type', AuditTrailsEntityTypeEnum::MODULE->value)
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(before_json, '$.project_id')) = ?", [$project_id])
+                ->pluck('entity_id');
+
+            $deletedArtifactIds = AuditTrail::where('entity_type', AuditTrailsEntityTypeEnum::ARTIFACT->value)
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(before_json, '$.project_id')) = ?", [$project_id])
+                ->pluck('entity_id');
+
+            $allModuleIds = $moduleIds->merge($deletedModuleIds)->unique();
+            $allArtifactIds = $artifactIds->merge($deletedArtifactIds)->unique();
+
+            $query->where(function ($q) use ($project_id, $allModuleIds, $allArtifactIds) {
+                $q->where(function ($q) use ($project_id) {
+                    $q->where('entity_type', AuditTrailsEntityTypeEnum::PROJECT->value)
+                      ->where('entity_id', $project_id);
+                })
+                ->orWhere(function ($q) use ($allModuleIds) {
+                    $q->where('entity_type', AuditTrailsEntityTypeEnum::MODULE->value)
+                      ->whereIn('entity_id', $allModuleIds);
+                })
+                ->orWhere(function ($q) use ($allArtifactIds) {
+                    $q->where('entity_type', AuditTrailsEntityTypeEnum::ARTIFACT->value)
+                      ->whereIn('entity_id', $allArtifactIds);
+                });
+            });
         }
 
         $order_by = $request->query('order_by', 'id');

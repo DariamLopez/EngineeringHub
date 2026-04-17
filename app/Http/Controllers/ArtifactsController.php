@@ -74,14 +74,13 @@ class ArtifactsController extends Controller
         $this->authorize('create', [Artifacts::class, $request]);
         $data['owner_user_id'] = $request->user()->id;
         $artifact = Artifacts::create($data);
-        $after_json = $artifact->content_json;
         AuditTrail::logAction(
             $request->user()->id,
             AuditTrailsEntityTypeEnum::ARTIFACT->value,
             $artifact->id,
             AuditTrailsActionsEnum::CREATED->value,
             null,
-            $after_json
+            $artifact->toArray()
         );
         return response()->json([
             'message' => 'Artifact created successfully',
@@ -120,16 +119,15 @@ class ArtifactsController extends Controller
         } else {
             $action = AuditTrailsActionsEnum::UPDATED->value;
         }
-        $before_json = $artifacts->content_json;
+        $before_artifact = $artifacts->replicate();
         $artifacts->update($request->validated());
-        $after_json = $artifacts->content_json;
         AuditTrail::logAction(
             $request->user()->id,
             AuditTrailsEntityTypeEnum::ARTIFACT->value,
             $artifacts->id,
             $action,
-            $before_json,
-            $after_json
+            $before_artifact->toArray(),
+            $artifacts->toArray()
         );
 
         return response()->json([
@@ -143,13 +141,13 @@ class ArtifactsController extends Controller
      */
     public function destroy(Artifacts $artifacts)
     {
-        $before_json = $artifacts->content_json;
+
         AuditTrail::logAction(
             request()->user()->id,
             AuditTrailsEntityTypeEnum::ARTIFACT->value,
             $artifacts->id,
             AuditTrailsActionsEnum::DELETED->value,
-            $before_json,
+            $artifacts->toArray(),
             null
         );
         $this->authorize('delete', $artifacts);
