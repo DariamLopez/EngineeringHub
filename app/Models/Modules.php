@@ -38,7 +38,21 @@ class Modules extends Model
 
     public function getDependenciesAttribute(mixed $value): array
     {
-        $ids = is_array($value) ? $value : (json_decode($value, true) ?? []);
+        if ($value === null || $value === '') {
+            return [];
+        }
+
+        $decoded = is_array($value) ? $value : (json_decode($value, true) ?? []);
+
+        if (!is_array($decoded) || empty($decoded)) {
+            return [];
+        }
+
+        // Normalize: extract IDs whether stored as plain IDs or as full objects
+        $ids = array_values(array_filter(array_map(
+            fn($item) => is_array($item) ? ($item['id'] ?? null) : (is_int($item) ? $item : null),
+            $decoded
+        )));
 
         if (empty($ids) || self::$dependencyLoadingDepth > 0) {
             return $ids;
@@ -56,7 +70,18 @@ class Modules extends Model
 
     public function setDependenciesAttribute(mixed $value): void
     {
-        $this->attributes['dependencies'] = is_array($value) ? json_encode($value) : $value;
+        if (!is_array($value)) {
+            $this->attributes['dependencies'] = $value;
+            return;
+        }
+
+        // Always persist only IDs, regardless of whether objects or IDs are passed in
+        $ids = array_values(array_filter(array_map(
+            fn($item) => is_array($item) ? ($item['id'] ?? null) : (is_int($item) ? $item : null),
+            $value
+        )));
+
+        $this->attributes['dependencies'] = json_encode($ids);
     }
 
     public function domain()

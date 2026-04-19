@@ -73,7 +73,7 @@ class ModulesController extends Controller
             $modules->id,
             AuditTrailsActionsEnum::CREATED->value,
             null,
-            null
+            $modules->toArray()
         );
         return response()->json([
             'message' => 'Module created successfully',
@@ -103,7 +103,7 @@ class ModulesController extends Controller
                 $module->id,
                 AuditTrailsActionsEnum::CREATED->value,
                 null,
-                null
+                $module->toArray()
             );
         }
 
@@ -144,7 +144,10 @@ class ModulesController extends Controller
             $action = AuditTrailsActionsEnum::UPDATED->value;
         }
         $old_module = $modules->replicate();
+        $old_module->id = $modules->id;
         $modules->update($request->validated());
+        Log::info("Old module data: " . json_encode($old_module->toArray()));
+        Log::info("New module data: " . json_encode($modules->toArray()));
         AuditTrail::logAction(
             $request->user()->id,
             AuditTrailsEntityTypeEnum::MODULE->value,
@@ -161,15 +164,29 @@ class ModulesController extends Controller
 
     public function massiveUpdate(UpdateMassiveModules $request)
     {
-        //TODO falta el autorize que aqui cambia porq en la request viene un array de modules
-        Log::info("Received request to update multiple modules with data: " . json_encode($request->input()));
+        /* Log::info("Received request to update multiple modules with data: " . json_encode($request->input())); */
         $data = $request->validated();
-        Log::info("Received request to update multiple modules with data: " . json_encode($data));
+        /* Log::info("Received request to update multiple modules with data: " . json_encode($data)); */
+
+        // Fetch all modules in one query
+        $moduleIds = array_column($data['modules'], 'id');
+        $modules = Modules::findMany($moduleIds)->keyBy('id');
+
+        // Authorize each module before making any changes
+        foreach ($data['modules'] as $moduleData) {
+            $module = $modules->get($moduleData['id']);
+            if ($module) {
+                $moduleRequest = Request::create('/', 'POST', $moduleData);
+                $this->authorize('update', [$module, $moduleRequest]);
+            }
+        }
+
         $updatedModules = [];
         foreach ($data['modules'] as $moduleData) {
-            $module = Modules::find($moduleData['id']);
+            $module = $modules->get($moduleData['id']);
             if ($module) {
                 $old_module = $module->replicate();
+                $old_module->id = $module->id;
                 $module->update($moduleData);
                 $updatedModules[] = $module;
                 AuditTrail::logAction(

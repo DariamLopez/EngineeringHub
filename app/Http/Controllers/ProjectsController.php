@@ -78,7 +78,7 @@ class ProjectsController extends Controller
             $projects->id,
             AuditTrailsActionsEnum::CREATED->value,
             null,
-            null
+            $projects->toArray()
         );
         return response()->json($projects, 201);
     }
@@ -108,14 +108,15 @@ class ProjectsController extends Controller
     {
         $this->authorize('update', [$projects, $request]);
 
+        $old_project = $projects->replicate();
         $projects->update($request->validated());
         AuditTrail::logAction(
             $request->user()->id,
             AuditTrailsEntityTypeEnum::PROJECT->value,
             $projects->id,
             AuditTrailsActionsEnum::UPDATED->value,
-            null,
-            null
+            $old_project->toArray(),
+            $projects->toArray()
         );
         return response()->json([
             'message' => 'Project update successfully',
