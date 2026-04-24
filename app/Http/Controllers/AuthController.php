@@ -32,6 +32,7 @@ class AuthController extends Controller
     public function register(RegisterRequest $request)
     {
         $this->authorize('create', User::class);
+        Log::info('Attempting to register user', ['email' => $request->input('email'), 'role' => $request->input('roles')]);
         $data = $request->validated();
 
         $user = User::create([
@@ -52,6 +53,7 @@ class AuthController extends Controller
             'token' => $token,
             'abilities' => $abilities
         ], 201);
+
     }
 
     public function login(LoginRequest $request)
@@ -71,20 +73,20 @@ class AuthController extends Controller
             return response()->json(['message' => 'Email no verificado.'], 403);
         } */
 
-        // Revocar tokens antiguos si se solicita (rotación opcional)
+        // Revoke old tokens if requested
         if (! empty($credentials['revoke_old_tokens'])) {
             $user->tokens()->delete();
         }
 
-        // Determinar abilities según roles/permissions
+        // Determine abilities based on roles/permissions
         $abilities = $this->abilitiesForUser($user);
 
         $token = $user->createToken('api-token', $abilities)->plainTextToken;
         $tokenModel = $user->tokens()->where('token', hash('sha256', explode('|', $token, 2)[1]))->first();
-        $tokenModel->expires_at = now()->addHours(1); // Expiración a 1 horas
+        $tokenModel->expires_at = now()->addHours(1);
         $tokenModel->save();
 
-        Log::info('User logged in', ['user_id' => $user, 'abilities' => $abilities]);
+        //Log::info('User logged in', ['user_id' => $user, 'abilities' => $abilities]);
         return response()->json([
             'user' => $user,
             'token' => $token,
@@ -100,12 +102,11 @@ class AuthController extends Controller
         return response()->json(['message' => 'Logged out successfully.'], 200);
     }
 
-    public function deleteUser(Request $request)
+    public function deleteUser(Request $request, User $user)
     {
-        $this->authorize('delete', User::class);
-        $user = $request->user();
-        $user->tokens()->delete(); // Revocar todos los tokens
-        $user->delete(); // Eliminar usuario
+        $this->authorize('delete', $request->user());
+        $user->tokens()->delete();
+        $user->delete();
         return response()->json([
             'message' => 'User deleted successfully.',
             'user' => $user
@@ -118,20 +119,22 @@ class AuthController extends Controller
     }
     public function users(Request $request)
     {
-        //TODO Implementar policy, solo los admins pueden ver la lista de usuarios
         $this->authorize('viewAny', User::class);
         $users = User::with('roles', 'permissions')->get();
         return response()->json($users);
     }
-
+    public function roles(Request $request)
+    {
+        $this->authorize('viewAny', User::class);
+        $roles = Role::all();
+        //Log::info('Roles retrieved', ['roles_count' => $roles->toArray()]);
+        return response()->json($roles);
+    }
     protected function abilitiesForUser(User $user): array
     {
-        // Si tiene rol admin, dar todas las abilities
         if ($user->hasRole('admin')) {
             return ['*'];
         }
-
-        // Recolectar permisos directos y por rol
         $perms = $user->getAllPermissions()->pluck('name')->unique()->toArray();
 
         // Si no hay permisos explícitos, asignar por rol por defecto

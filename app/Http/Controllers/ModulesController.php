@@ -167,8 +167,6 @@ class ModulesController extends Controller
         /* Log::info("Received request to update multiple modules with data: " . json_encode($request->input())); */
         $data = $request->validated();
         /* Log::info("Received request to update multiple modules with data: " . json_encode($data)); */
-
-        // Fetch all modules in one query
         $moduleIds = array_column($data['modules'], 'id');
         $modules = Modules::findMany($moduleIds)->keyBy('id');
 

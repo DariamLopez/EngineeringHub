@@ -11,11 +11,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 
-Route::post('/register', [AuthController::class, 'register'])->middleware('auth:sanctum')->name('register');
+Route::get('/roles', [AuthController::class, 'roles'])->middleware('auth:sanctum');
 //Users Route
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('auth:sanctum')->name('register');
     Route::get('/users', [AuthController::class, 'users'])->name('user');
+    Route::delete('/users/{user}', [AuthController::class, 'deleteUser']);
 });
 // projects routes
 Route::group(['middleware' => 'auth:sanctum'], function () {

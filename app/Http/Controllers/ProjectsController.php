@@ -15,7 +15,6 @@ class ProjectsController extends Controller
 {
     use AuthorizesRequests;
     /**
-     * TODO agregar permisos y request
      * Display a listing of the resource.
      */
     public function index(Request $request)

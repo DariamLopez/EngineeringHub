@@ -18,9 +18,6 @@ class DomainController extends Controller
      */
     public function index(Request $request)
     {
-        //$this->authorize('viewAny', Domain::class);
-
-        //$project_id = $request->validated('project_id');
         //Log::info("Fetching domains for project_id: $project_id with filters: " . json_encode($request->validated()));
         $query = Domain::query()->with('modules')->with('owner')->with('project')->where('project_id', $request->query('project_id'));
         if ($domain_name = $request->query('name')) {

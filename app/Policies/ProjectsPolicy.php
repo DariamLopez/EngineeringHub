@@ -85,13 +85,13 @@ class ProjectsPolicy
         return false;
     }
     /**
-     * Gate 4: No puedes mover el status del proyecto de discovery a execution
-     * a menos que strategic_alignment, big_picture, domain_breakdown y module_matrix estén done
+     * Gate 4: You cannot move the project to execution if the following aspects are not completed: strategic alignment,
+     * big picture, domain breakdown and module matrix.
      */
     public function moveToExecution(User $user, Projects $project): Response
     {
         if ($project->status !== \App\Enums\ProjectStatusEnum::DISCOVERY->value) {
-            return Response::allow(); // Solo aplica al pasar de discovery a execution
+            return Response::allow(); // Only applies when moving from discovery to execution
         }
         $requiredTypes = [
             \App\Enums\ArtifactTypeEnum::STRATEGIC_ALIGNMENT->value,

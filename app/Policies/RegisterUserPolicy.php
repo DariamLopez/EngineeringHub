@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log as FacadesLog;
 class RegisterUserPolicy
 {
     /**
-     * Solo los usuarios con rol admin pueden registrar usuarios.
+     * Only users with admin role can create new users.
      */
     public function create(User $user): bool
     {
@@ -16,13 +16,16 @@ class RegisterUserPolicy
     }
 
     /**
-     * Solo los usuarios con rol admin pueden eliminar usuarios.
+     * Only users with admin role can delete users.
      */
     public function delete(User $user): bool
     {
         return $user->roles->first()->name == 'admin';
     }
 
+    /**
+     * Only users with admin role can view users.
+     */
     public function viewAny(User $user): bool
     {
         if ($user->can('view_users')) {

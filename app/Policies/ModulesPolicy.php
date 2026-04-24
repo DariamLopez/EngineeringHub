@@ -48,18 +48,18 @@ class ModulesPolicy
     public function update(User $user, Modules $modules, Request $request): Response
     {
         if ($user->can('edit_modules')) {
-            //Si el status se está cambiando a ¨validated¨, aplicamos las gates adicionales
-            if  ($request->input('status') === \App\Enums\ModuleStatusEnum::VALIDATED->value) {
+        // If the request is trying to update the status, we need to check if the user has the right permissions
+        if  ($request->input('status') === \App\Enums\ModuleStatusEnum::VALIDATED->value) {
                 $gateResponse = $this->markAsValidated($user, $modules);
                 return $gateResponse;
             }
             if ($request->input('status') === \App\Enums\ModuleStatusEnum::READY_FOR_BUILD->value) {
                 $gateResponse = $this->markAsValidated($user, $modules);
                 if ($gateResponse->allowed()) {
-                    //Si el módulo es validado, también se puede marcar como listo para construcción
+                    // If the module is validated, it can be marked as ready for build
                     return Response::allow();
                 } else {
-                    //Si el módulo no es validado, no se puede marcar como listo para construcción
+                    // If the module is not validated, it cannot be marked as ready for build
                     return Response::deny('Module must be validated before it can be marked as ready for build.');
                 }
             }

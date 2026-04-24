@@ -35,11 +35,9 @@ class AuditTrailController extends Controller
             $query->where('entity_id', $entity_id);
         }
         if ($project_id = $request->query('project_id')) {
-            // IDs de entidades que aún existen en la BD
             $moduleIds = Modules::where('project_id', $project_id)->pluck('id');
             $artifactIds = Artifacts::where('project_id', $project_id)->pluck('id');
 
-            // IDs de entidades ya eliminadas: se recuperan desde before_json de sus audits de delete
             $deletedModuleIds = AuditTrail::where('entity_type', AuditTrailsEntityTypeEnum::MODULE->value)
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(before_json, '$.project_id')) = ?", [$project_id])
                 ->pluck('entity_id');
