@@ -18,7 +18,7 @@ class ModulesTest extends TestCase
         $admin = $this->createAdmin();
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->getJson('/api/modules');
+            ->getJson('/api/v1/modules');
 
         $response->assertStatus(200);
     }
@@ -30,7 +30,7 @@ class ModulesTest extends TestCase
         $domain = Domain::factory()->create(['project_id' => $project->id, 'owner_user_id' => $admin->id]);
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/modules', [
+            ->postJson('/api/v1/modules', [
                 'name' => 'Auth Module',
                 'status' => 'draft',
                 'project_id' => $project->id,
@@ -46,7 +46,7 @@ class ModulesTest extends TestCase
         $admin = $this->createAdmin();
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/modules', []);
+            ->postJson('/api/v1/modules', []);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['name']);
@@ -59,7 +59,7 @@ class ModulesTest extends TestCase
         $domain = Domain::factory()->create(['project_id' => $project->id]);
 
         $response = $this->actingAs($viewer, 'sanctum')
-            ->postJson('/api/modules', [
+            ->postJson('/api/v1/modules', [
                 'name' => 'Module',
                 'status' => 'draft',
                 'project_id' => $project->id,
@@ -76,7 +76,7 @@ class ModulesTest extends TestCase
         $domain = Domain::factory()->create(['project_id' => $project->id, 'owner_user_id' => $admin->id]);
 
         $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/modules', [
+            ->postJson('/api/v1/modules', [
                 'name' => 'Audited Module',
                 'status' => 'draft',
                 'project_id' => $project->id,
@@ -92,7 +92,7 @@ class ModulesTest extends TestCase
 
     public function test_unauthenticated_cannot_access_modules(): void
     {
-        $response = $this->getJson('/api/modules');
+        $response = $this->getJson('/api/v1/modules');
         $response->assertStatus(401);
     }
 }

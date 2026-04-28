@@ -18,7 +18,7 @@ class DomainsTest extends TestCase
         Domain::factory()->count(2)->create();
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->getJson('/api/domains');
+            ->getJson('/api/v1/domains');
 
         $response->assertStatus(200);
     }
@@ -29,7 +29,7 @@ class DomainsTest extends TestCase
         $project = Projects::factory()->create(['created_by' => $admin->id]);
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/domains', [
+            ->postJson('/api/v1/domains', [
                 'name' => 'Auth Domain',
                 'objective' => 'Handle authentication',
                 'owner_user_id' => $admin->id,
@@ -45,7 +45,7 @@ class DomainsTest extends TestCase
         $admin = $this->createAdmin();
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/domains', []);
+            ->postJson('/api/v1/domains', []);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['name', 'objective', 'owner_user_id', 'project_id']);
@@ -65,7 +65,7 @@ class DomainsTest extends TestCase
 
     public function test_unauthenticated_cannot_access_domains(): void
     {
-        $response = $this->getJson('/api/domains');
+        $response = $this->getJson('/api/v1/domains');
         $response->assertStatus(401);
     }
 }

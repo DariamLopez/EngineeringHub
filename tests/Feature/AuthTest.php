@@ -17,7 +17,7 @@ class AuthTest extends TestCase
         $user = User::factory()->create(['password' => bcrypt('password')]);
         $user->assignRole('admin');
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/login', [
             'email' => $user->email,
             'password' => 'password',
         ]);
@@ -30,7 +30,7 @@ class AuthTest extends TestCase
     {
         $user = User::factory()->create(['password' => bcrypt('password')]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/login', [
             'email' => $user->email,
             'password' => 'wrong-password',
         ]);
@@ -40,7 +40,7 @@ class AuthTest extends TestCase
 
     public function test_login_requires_email_and_password(): void
     {
-        $response = $this->postJson('/api/login', []);
+        $response = $this->postJson('/api/v1/login', []);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['email', 'password']);
@@ -51,7 +51,7 @@ class AuthTest extends TestCase
         $admin = $this->createAdmin();
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/register', [
+            ->postJson('/api/v1/register', [
                 'name' => 'New User',
                 'email' => 'newuser@example.com',
                 'password' => 'secret',
@@ -68,7 +68,7 @@ class AuthTest extends TestCase
         $viewer = $this->createViewer();
 
         $response = $this->actingAs($viewer, 'sanctum')
-            ->postJson('/api/register', [
+            ->postJson('/api/v1/register', [
                 'name' => 'New User',
                 'email' => 'newuser@example.com',
                 'password' => 'secret',
@@ -80,7 +80,7 @@ class AuthTest extends TestCase
 
     public function test_unauthenticated_user_cannot_register(): void
     {
-        $response = $this->postJson('/api/register', [
+        $response = $this->postJson('/api/v1/register', [
             'name' => 'New User',
             'email' => 'newuser@example.com',
             'password' => 'secret',

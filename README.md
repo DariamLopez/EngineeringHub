@@ -140,68 +140,68 @@ Roles and permissions are seeded automatically by `PermissionSeeder`.
 
 ## API Endpoints
 
-All endpoints (except `POST /api/login`) require a Sanctum Bearer token.
+All endpoints (except `POST /api/v1/login`) require a Sanctum Bearer token.
 
 ### Authentication
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/login` | Obtain a token (1-hour expiry) |
-| `POST` | `/api/logout` | Revoke current token |
-| `POST` | `/api/register` | Create a new user (admin only) |
-| `GET` | `/api/users` | List all users |
-| `DELETE` | `/api/users/{id}` | Delete a user |
-| `GET` | `/api/roles` | List all roles |
+| `POST` | `/api/v1/login` | Obtain a token (1-hour expiry) |
+| `POST` | `/api/v1/logout` | Revoke current token |
+| `POST` | `/api/v1/register` | Create a new user (admin only) |
+| `GET` | `/api/v1/users` | List all users |
+| `DELETE` | `/api/v1/users/{id}` | Delete a user |
+| `GET` | `/api/v1/roles` | List all roles |
 
 ### Projects
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/projects` | List projects (filterable by `status`, `client_name`, `is_archived`, `created_by_id`) |
-| `POST` | `/api/projects` | Create a project |
-| `GET` | `/api/projects/{id}` | Get a project with domains, modules, artifacts |
-| `PUT` | `/api/projects/{id}` | Update a project |
-| `DELETE` | `/api/projects/{id}` | Delete a project |
+| `GET` | `/api/v1/projects` | List projects (filterable by `status`, `client_name`, `is_archived`, `created_by_id`) |
+| `POST` | `/api/v1/projects` | Create a project |
+| `GET` | `/api/v1/projects/{id}` | Get a project with domains, modules, artifacts |
+| `PUT` | `/api/v1/projects/{id}` | Update a project |
+| `DELETE` | `/api/v1/projects/{id}` | Delete a project |
 
 ### Domains
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/domains?project_id=` | List domains for a project |
-| `POST` | `/api/domains` | Create a domain |
-| `POST` | `/api/domains/massive` | Bulk create domains |
-| `PUT` | `/api/domains/{id}` | Update a domain |
-| `PUT` | `/api/domains/massive` | Bulk update domains |
-| `DELETE` | `/api/domains/{id}` | Delete a domain |
-| `DELETE` | `/api/domains/massive` | Bulk delete domains |
+| `GET` | `/api/v1/domains?project_id=` | List domains for a project |
+| `POST` | `/api/v1/domains` | Create a domain |
+| `POST` | `/api/v1/domains/massive` | Bulk create domains |
+| `PUT` | `/api/v1/domains/{id}` | Update a domain |
+| `PUT` | `/api/v1/domains/massive` | Bulk update domains |
+| `DELETE` | `/api/v1/domains/{id}` | Delete a domain |
+| `DELETE` | `/api/v1/domains/massive` | Bulk delete domains |
 
 ### Modules
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/modules` | List modules |
-| `POST` | `/api/modules` | Create a module |
-| `POST` | `/api/modules/massive` | Bulk create modules |
-| `PUT` | `/api/modules/{id}` | Update a module |
-| `PUT` | `/api/modules/massive` | Bulk update modules |
-| `DELETE` | `/api/modules/{id}` | Delete a module |
-| `DELETE` | `/api/modules/massive` | Bulk delete modules |
+| `GET` | `/api/v1/modules` | List modules |
+| `POST` | `/api/v1/modules` | Create a module |
+| `POST` | `/api/v1/modules/massive` | Bulk create modules |
+| `PUT` | `/api/v1/modules/{id}` | Update a module |
+| `PUT` | `/api/v1/modules/massive` | Bulk update modules |
+| `DELETE` | `/api/v1/modules/{id}` | Delete a module |
+| `DELETE` | `/api/v1/modules/massive` | Bulk delete modules |
 
 ### Artifacts
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/artifacts?project_id=` | List artifacts (filterable by `type`, `status`, `owner_user_id`) |
-| `POST` | `/api/artifacts` | Create an artifact |
-| `GET` | `/api/artifacts/{id}` | Get an artifact (content_json enriched at read time) |
-| `PUT` | `/api/artifacts/{id}` | Update an artifact |
-| `DELETE` | `/api/artifacts/{id}` | Delete an artifact |
+| `GET` | `/api/v1/artifacts?project_id=` | List artifacts (filterable by `type`, `status`, `owner_user_id`) |
+| `POST` | `/api/v1/artifacts` | Create an artifact |
+| `GET` | `/api/v1/artifacts/{id}` | Get an artifact (content_json enriched at read time) |
+| `PUT` | `/api/v1/artifacts/{id}` | Update an artifact |
+| `DELETE` | `/api/v1/artifacts/{id}` | Delete an artifact |
 
 ### Audit Trail
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/audit-trails` | List all audit trail entries |
+| `GET` | `/api/v1/audit-trails` | List all audit trail entries |
 
 All list endpoints support `order_by`, `order_dir`, and `per_page` query parameters for sorting and pagination.
 
@@ -273,7 +273,7 @@ Or individually:
 php artisan serve
 ```
 
-The API will be available at `http://localhost:8000/api`.
+The API will be available at `http://localhost:8000/api/v1`.
 
 ---
 
@@ -364,7 +364,7 @@ The project includes a `nixpacks.toml` that configures Railway to use PHP 8.4 an
 - **DTO classes** — Use Data Transfer Objects for validated request data instead of passing raw arrays
 
 ### API Design
-- **API versioning** — Prefix routes with `/v1/` to allow non-breaking evolution of the API
+- ~~**API versioning** — Prefix routes with `/v1/` to allow non-breaking evolution of the API~~ *(implemented)*
 - **Consistent pagination** — Enforce pagination by default on all collection endpoints; currently `per_page` is optional which can return unbounded result sets
 - **HATEOAS / hypermedia links** — Include related resource links in responses
 - **Standard error envelope** — Standardize all error responses with a consistent JSON structure (`{ "error": { "code": ..., "message": ... } }`)

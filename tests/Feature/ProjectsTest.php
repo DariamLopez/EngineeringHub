@@ -17,7 +17,7 @@ class ProjectsTest extends TestCase
         Projects::factory()->count(3)->create(['created_by' => $admin->id]);
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->getJson('/api/projects');
+            ->getJson('/api/v1/projects');
 
         $response->assertStatus(200);
     }
@@ -27,7 +27,7 @@ class ProjectsTest extends TestCase
         $admin = $this->createAdmin();
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/projects', [
+            ->postJson('/api/v1/projects', [
                 'name' => 'Test Project',
                 'client_name' => 'Test Client',
                 'description' => 'A test project',
@@ -43,7 +43,7 @@ class ProjectsTest extends TestCase
         $admin = $this->createAdmin();
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/projects', []);
+            ->postJson('/api/v1/projects', []);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['name', 'client_name']);
@@ -91,7 +91,7 @@ class ProjectsTest extends TestCase
         $viewer = $this->createViewer();
 
         $response = $this->actingAs($viewer, 'sanctum')
-            ->postJson('/api/projects', [
+            ->postJson('/api/v1/projects', [
                 'name' => 'Test',
                 'client_name' => 'Client',
             ]);
@@ -101,7 +101,7 @@ class ProjectsTest extends TestCase
 
     public function test_unauthenticated_cannot_access_projects(): void
     {
-        $response = $this->getJson('/api/projects');
+        $response = $this->getJson('/api/v1/projects');
         $response->assertStatus(401);
     }
 
@@ -110,7 +110,7 @@ class ProjectsTest extends TestCase
         $admin = $this->createAdmin();
 
         $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/projects', [
+            ->postJson('/api/v1/projects', [
                 'name' => 'Audited Project',
                 'client_name' => 'Client',
                 'status' => 'draft',

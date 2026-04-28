@@ -19,7 +19,7 @@ class ArtifactsTest extends TestCase
         $admin = $this->createAdmin();
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->getJson('/api/artifacts');
+            ->getJson('/api/v1/artifacts');
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['project_id']);
@@ -43,7 +43,7 @@ class ArtifactsTest extends TestCase
         $project = Projects::factory()->create(['created_by' => $admin->id]);
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/artifacts', [
+            ->postJson('/api/v1/artifacts', [
                 'type' => ArtifactTypeEnum::BIG_PICTURE->value,
                 'status' => ArtifactStatusEnum::NOT_STARTED->value,
                 'project_id' => $project->id,
@@ -86,7 +86,7 @@ class ArtifactsTest extends TestCase
         $project = Projects::factory()->create(['created_by' => $admin->id]);
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/artifacts', [
+            ->postJson('/api/v1/artifacts', [
                 'type' => ArtifactTypeEnum::BIG_PICTURE->value,
                 'status' => ArtifactStatusEnum::NOT_STARTED->value,
                 'project_id' => $project->id,
@@ -107,7 +107,7 @@ class ArtifactsTest extends TestCase
         $project = Projects::factory()->create();
 
         $response = $this->actingAs($viewer, 'sanctum')
-            ->postJson('/api/artifacts', [
+            ->postJson('/api/v1/artifacts', [
                 'type' => ArtifactTypeEnum::BIG_PICTURE->value,
                 'status' => ArtifactStatusEnum::NOT_STARTED->value,
                 'project_id' => $project->id,
@@ -138,7 +138,7 @@ class ArtifactsTest extends TestCase
         $project = Projects::factory()->create(['created_by' => $admin->id]);
 
         $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/artifacts', [
+            ->postJson('/api/v1/artifacts', [
                 'type' => ArtifactTypeEnum::BIG_PICTURE->value,
                 'status' => ArtifactStatusEnum::NOT_STARTED->value,
                 'project_id' => $project->id,
@@ -158,7 +158,7 @@ class ArtifactsTest extends TestCase
 
     public function test_unauthenticated_cannot_access_artifacts(): void
     {
-        $response = $this->getJson('/api/artifacts?project_id=1');
+        $response = $this->getJson('/api/v1/artifacts?project_id=1');
         $response->assertStatus(401);
     }
 }
